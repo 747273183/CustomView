@@ -154,7 +154,7 @@ public class RoundProgressBar extends View {
         int y= (int) (height/2.0) ;
         Rect bounds=new Rect();
         mPaint.getTextBounds(text,0,text.length(),bounds);
-        int textHeight=bounds.height();
+        int textHeight=bounds.height();//获得文本的高度
 
 //        canvas.drawText(text,0,text.length(),width/2,y+textHeight/2-mPaint.descent()/2,mPaint);//如果text是中文
 

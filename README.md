@@ -306,6 +306,7 @@ public class TestView extends View {
     }
 ```
 ## 第四章 案例:百分比进度条
+![attrs.xml文件](/readme/img/a4.gif)
 ### 4-1 自定义属性文件的声明和获取
 ```
 <declare-styleable name="RoundProgressBar">
@@ -467,8 +468,24 @@ public class TestView extends View {
         return mProgress;
     }
 ```
-2. 在MainActivtiy使用属性动画进行测试    
+2. 在MainActivtiy使用属性动画进行测试
+
+- 布局文件
+```
+    <com.example.customview.RoundProgressBar
+        android:id="@+id/roundProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="10dp"
+        android:progress="0"
+        android:textSize="72dp"
+        app:radius="90dp"
+        app:color="#ff0000"
+        />
+```
   
+- java代码
 ```
  final View view = findViewById(R.id.roundProgressBar);
 
@@ -481,3 +498,49 @@ public class TestView extends View {
 ```
 ## 第五章 案例
 ### 5-1 课程总结
+1. 首先我们通过一个TestView演示自定义View的四个步骤
+2. 然后我们复制一个TestView的代码修改为RoundProgressBar,          
+   修改时我们真正需要改变的有以下几点:
+- 构造方法中获得属性,因为每个自定义view所对应的属性都是不一样的
+- onMeasure几乎没有修改,唯一点就是measureWidth和measureHeight,就是不同的view,决定自己宽高的写法肯定是不一样的
+- 绘制onDraw需要根据view的特点进行绘制,需要掌握就是canvas的API,Paint的一些设置
+  包括canvas.translate(getPaddingLeft(),getPaddingTop());//移动画笔,
+  canvas.restore();//画布取出原来保存的状态      
+  重点是要知道在绘制Text时,y的参数是设置文本的baseLine,而不是文字的最底部,所以注意在绘制中文和英文时
+  字体上下并不是居中的            
+```
+    int y= (int) (height/2.0) ;
+    Rect bounds=new Rect();
+    mPaint.getTextBounds(text,0,text.length(),bounds);
+    int textHeight=bounds.height();//获得文本的高度
+  canvas.drawText(text,0,text.length(),width/2,y+textHeight/2-mPaint.descent()/2,mPaint);//如果text是中文
+  canvas.drawText(text,0,text.length(),width/2,y+textHeight/2,mPaint);
+```
+- 最后是状态的存储与恢复,不要忘记存储和恢复父view已经存储和恢复过的状态
+```
+    //状态的存储与恢复
+    private  static  final String INSTANCE="instance";
+    private static  final String KEY_PROGRESS="key_progress";
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle=new Bundle();
+        bundle.putParcelable(INSTANCE,super.onSaveInstanceState());
+        bundle.putInt(KEY_PROGRESS,mProgress);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof  Bundle)
+        {
+            mProgress = ((Bundle) state).getInt(KEY_PROGRESS);
+            Parcelable parcelable = ((Bundle) state).getParcelable(INSTANCE);
+            super.onRestoreInstanceState(parcelable);
+        }
+        super.onRestoreInstanceState(state);
+    }
+
+```
+对于状态的存储与恢复基本上就是上面的格式,唯一的就是找到自定义view那些状态是需要存储与恢复的.       
+**需要注意的是,要成功的实现view的状态与恢复,需要给view添加一个id**

@@ -23,10 +23,10 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:padding="10dp"
-        android:progress="30"
+        android:progress="0"
         android:textSize="72dp"
-        app:radius="80dp"
-        app:color="#00ff00"
+        app:radius="90dp"
+        app:color="#ff0000"
         />
 
 </RelativeLayout>
