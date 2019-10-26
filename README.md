@@ -517,7 +517,7 @@ public class TestView extends View {
   canvas.drawText(text,0,text.length(),width/2,y+textHeight/2,mPaint);
 ```
 ![文本的基线](/readme/img/a12.png)       
-![文本的基线2](/readme/img/timg)
+![文本的基线2](/readme/img/timg.jpg)
 - 最后是状态的存储与恢复,不要忘记存储和恢复父view已经存储和恢复过的状态
 ```
     //状态的存储与恢复
