@@ -516,7 +516,8 @@ public class TestView extends View {
   canvas.drawText(text,0,text.length(),width/2,y+textHeight/2-mPaint.descent()/2,mPaint);//如果text是中文
   canvas.drawText(text,0,text.length(),width/2,y+textHeight/2,mPaint);
 ```
-
+![文本的基线](/readme/img/a12.png)       
+![文本的基线2](/readme/img/timg)
 - 最后是状态的存储与恢复,不要忘记存储和恢复父view已经存储和恢复过的状态
 ```
     //状态的存储与恢复
@@ -545,5 +546,3 @@ public class TestView extends View {
 ```
 对于状态的存储与恢复基本上就是上面的格式,唯一的就是找到自定义view那些状态是需要存储与恢复的.       
 **需要注意的是,要成功的实现view的状态与恢复,需要给view添加一个id**
-![文本的基线](/readme/img/a12.png)       
-![文本的基线2](/readme/img/timg)
