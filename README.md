@@ -306,8 +306,178 @@ public class TestView extends View {
     }
 ```
 ## 第四章 案例:百分比进度条
-### 4-1 案例(上)
-### 4-2 案例(下)
+### 4-1 自定义属性文件的声明和获取
+```
+<declare-styleable name="RoundProgressBar">
+        <attr name="color" format="color"></attr>
+        <attr name="android:progress" ></attr>
+        <attr name="android:textSize" ></attr>
+        <attr name="radius" format="dimension"></attr>
+        <attr name="line_width" format="dimension"></attr>
+    </declare-styleable>
+```
+### 4-2 测量onMeasure
+```
+//测量
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //定义测量结果
+        int measureedWidth = 0,measureedHeight = 0;
 
+        //测量宽
+        int modeWidth = MeasureSpec.getMode(widthMeasureSpec);
+        int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
+        if (modeWidth==MeasureSpec.EXACTLY)
+        {
+            measureedWidth=sizeWidth;
+        }
+        else
+        {
+            int needWidth=measureWidth()+getPaddingLeft()+getPaddingRight();
+            if (modeWidth==MeasureSpec.AT_MOST)
+            {
+                measureedWidth=Math.min(needWidth,sizeWidth);
+            }
+            else
+            {
+                measureedWidth=needWidth;
+            }
+        }
+        //测量高
+        int modeHeight = MeasureSpec.getMode(heightMeasureSpec);
+        int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
+        if (modeHeight==MeasureSpec.EXACTLY)
+        {
+            measureedHeight=sizeWidth;
+        }
+        else
+        {
+            int needHeight=measureHeight()+getPaddingTop()+getPaddingBottom();
+            if (modeWidth==MeasureSpec.AT_MOST)
+            {
+                measureedHeight=Math.min(needHeight,sizeHeight);
+            }
+            else
+            {
+                measureedHeight=needHeight;
+            }
+        }
+        //设置宽和高的测量结果
+        setMeasuredDimension(measureedWidth,measureedHeight);
+    }
+
+    private int measureHeight() {
+        return mRadius*2;
+    }
+
+
+    private int measureWidth() {
+        return mRadius*2;
+    }
+
+```
+### 4-3 绘制onDraw
+```
+ @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+//        初始化画圆弧的矩形
+        rectF=new RectF(0,0,w-getPaddingLeft()*2,h-getPaddingTop()*2);
+    }
+
+    //绘制
+    @Override
+    protected void onDraw(Canvas canvas) {
+       //画细圆
+        mPaint.setStyle(Paint.Style.STROKE);//空心的
+        mPaint.setStrokeWidth(mLineWidth/4.0f);//画笔粗细
+
+        int width=getWidth();
+        int height=getHeight();
+        canvas.drawCircle(width/2,height/2,
+                width/2-getPaddingLeft()-mPaint.getStrokeWidth()/2,
+                mPaint);
+        //画圆弧(粗圆)
+        canvas.save();//画布将当前的状态保存
+        canvas.translate(getPaddingLeft(),getPaddingTop());//移动画笔
+
+        float angle=mProgress*1.0f/100*360;//计算弧度
+        mPaint.setColor(mColor);//设置画笔颜色
+        mPaint.setStrokeWidth(mPaint.getStrokeWidth()*6);//设置画笔粗细
+        canvas.drawArc(rectF,0,angle,false,mPaint);
+        canvas.restore();//画布取出原来保存的状态
+
+        //画进度
+        String text=mProgress+"%";
+//        text="慕课网";
+        mPaint.setTextAlign(Paint.Align.CENTER);//字体居中
+        mPaint.setStrokeWidth(0);
+        mPaint.setTextSize(mTextSize);
+        int y= (int) (height/2.0) ;
+        Rect bounds=new Rect();
+        mPaint.getTextBounds(text,0,text.length(),bounds);
+        int textHeight=bounds.height();
+
+//        canvas.drawText(text,0,text.length(),width/2,y+textHeight/2-mPaint.descent()/2,mPaint);//如果text是中文
+
+        canvas.drawText(text,0,text.length(),width/2,y+textHeight/2,mPaint);
+
+        //画一个辅助线看进度文本是否居中
+//        canvas.drawLine(0,height/2,getWidth(),height/2,mPaint);
+//        canvas.drawLine(width/2,0,width/2,height,mPaint);
+    }
+```
+### 4-4 状态存储与恢复
+```
+ //状态的存储与恢复
+    private  static  final String INSTANCE="instance";
+    private static  final String KEY_PROGRESS="key_progress";
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle=new Bundle();
+        bundle.putParcelable(INSTANCE,super.onSaveInstanceState());
+        bundle.putInt(KEY_PROGRESS,mProgress);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof  Bundle)
+        {
+            mProgress = ((Bundle) state).getInt(KEY_PROGRESS);
+            Parcelable parcelable = ((Bundle) state).getParcelable(INSTANCE);
+            super.onRestoreInstanceState(parcelable);
+        }
+        super.onRestoreInstanceState(state);
+    }
+```
+### 4-5 测试
+1. 在RoundProgressBar中提供方法可以修改和获得进度
+```
+//对外提供改变进度和获得进度的方法
+    public void setProgress(int progress)
+    {
+      mProgress=progress;
+      invalidate();
+    }
+
+    public int getProgress()
+    {
+        return mProgress;
+    }
+```
+2. 在MainActivtiy使用属性动画进行测试    
+  
+```
+ final View view = findViewById(R.id.roundProgressBar);
+
+       view.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               ObjectAnimator.ofInt(view,"progress",0,100).setDuration(3000).start();
+           }
+       });
+```
 ## 第五章 案例
 ### 5-1 课程总结
